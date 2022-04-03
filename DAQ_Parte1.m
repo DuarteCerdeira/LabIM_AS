@@ -56,7 +56,7 @@ delta_phi = angle(U1(index_1)) - angle(U2(index_2)); % cálculo da diferença de
 
 media = mean((data.^2))
 valef = sqrt(media)
-penis;
+
 % =========== Frequência =========== %
 
 res_espet = 1
