@@ -1,6 +1,5 @@
 % Instrumentação e Medidas - Laboratório 5 - Aquisição de Sinais
 % 96195 - Duarte Cerdeira
-% 96242 - João Santos
 % Outros caralhos
 
 clear
