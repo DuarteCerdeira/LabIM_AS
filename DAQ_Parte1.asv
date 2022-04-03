@@ -16,11 +16,9 @@ n_samples = 5000; % num de amostras
 res_espet = fa / n_samples; % resolução espetral
 res_temp = 1 / fa; % resolução temporal
 
-tf = []; % transformada de fourier
-tf_uni = []; % transformadad de fourier unilateral
-power_spect = []; % espetro de potência
-
-% =========== Aquisição de sinais =========== %
+tf = []; % transformada de 
+tf_uni = [];
+power_spect = [];
 
 addinput(d, model_id, channel, "Voltage");
 
