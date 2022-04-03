@@ -16,11 +16,9 @@ n_samples = 5000; % num de amostras
 res_espet = fa / n_samples; % resolução espetral
 res_temp = 1 / fa; % resolução temporal
 
-tf = []; % transformada de fourier
-tf_uni = []; % transformadad de fourier unilateral
-power_spect = []; % espetro de potência
-
-% =========== Aquisição de sinais =========== %
+tf = []; % transformada de 
+tf_uni = [];
+power_spect = [];
 
 addinput(d, model_id, channel, "Voltage");
 
@@ -54,3 +52,32 @@ U2 = fft(u2); % transformada de fourier de sinal 2
 delta_phi = angle(U1(index_1)) - angle(U2(index_2)); % cálculo da diferença de fases
 
 
+% =========== Valor Eficaz =========== %
+
+media = mean((data.^2)')
+valef = sqrt(media)
+
+% =========== Frequência =========== %
+
+res_espet = 1
+
+z(1,:) = cos(2*pi*2*t)
+z(2,:) = cos(2*pi*3*t)
+z(3,:) = cos(2*pi*5*t)
+
+plot(t,z)
+
+freqs = zeros(1, height(z))
+
+for index = 1:height(z)
+    tf = fft(z(index,:));
+    tf = abs(tf / n_samples);
+    tf_uni = tf(1:n_samples / 2 + 1);
+    tf_uni(2:end-1) = 2*tf_uni(2:end-1);
+    f = res_espet * (0:n_samples/2);
+    [~,I] = max(abs(tf));
+    freqs(index) = freq(I)
+end
+
+plot(f, tf_uni);
+xlim([0 10])
