@@ -10,8 +10,8 @@ model_id = ""; % id do modelo
 channel = 0; % canal/canais a ler
 range = 10; % range do modelo
 
-fa = 1000; % frequência de amostragem
-n_samples = 5000; % num de amostras
+fa = 10000; % frequência de amostragem
+n_samples = 10000; % num de amostras
 
 res_espet = fa / n_samples; % resolução espetral
 res_temp = 1 / fa; % resolução temporal
@@ -26,11 +26,28 @@ t = res_temp * (0:n_samples);
 
 % data = data';
 
-data = 3 * cos(2*pi*50*t);
+data = zeros(10, n_samples + 1);
+tf = zeros(10, n_samples + 1);
+tf_uni = zeros(10, n_samples / 2 + 1);
+
+for i = 1:10
+    data(i,:) = 0.8 * cos(2*pi*1000*t) + 0.010*randn(size(t));
+
+    tf(i,:) = fft(data(i,:));
+    tf(i,:) = abs(tf(i,:)) / n_samples; % módulo da transformada de fourier
+    tf_uni(i,:) = tf(i,1:n_samples / 2 + 1); 
+    tf_uni(i,2:end-1) = 2*tf_uni(i,2:end-1); % transformada de fourier unilateral
+end
+
+tf_uni_av = mean(tf_uni);
+
+data_av = mean(data);
 
 % =========== Valor Eficaz =========== %
 
-valef = sqrt(mean(data.^2))
+valef = sqrt(mean(data_av.^2));
+
+noise_ef = mean(sqrt(mean((data(1:10, :) - data_av).^2)));
 
 % =========== Frequência =========== %
 
@@ -40,22 +57,22 @@ valef = sqrt(mean(data.^2))
 
 % plot(t,z)
 
-tf = fft(data);
-tf = abs(tf) / n_samples; % módulo da transformada de fourier
-tf_uni = tf(1:n_samples / 2 + 1); 
-tf_uni(2:end-1) = 2*tf_uni(2:end-1); % transformada de fourier unilateral
+[f_fund_ef, f_fund] = max(mean(tf_uni) / sqrt(2)); % frequência fundamental e respetivo valor eficaz
 
-[f_fund_ef, f_fund] = max(tf_uni / sqrt(2)); % frequência fundamental e respetivo valor eficaz
+f_est = (sum(tf_uni_av(f_fund-3:f_fund+3) .* (f_fund-3 - 1:f_fund+3 - 1) .* res_espet)) / ...
+    sum(tf_uni_av(f_fund-3:f_fund+3)); 
 
-f_fund = (f_fund - 1) * res_espet
+%f_fund = (f_fund - 1) * res_espet;
 
 % =========== Valor médio =========== %
 
-valor_medio = mean (data)
+% valor_medio = mean (data_av)
 
 % =========== Espectro de potência =========== %
 
-power_spect = 20 * log10(tf_uni);
+power_spect(1:10,:) = 20 * log10(tf_uni(1:10,:));
+
+power_spect_den(1:10,:) = 10 * log10((tf_uni(1:10,:).^2) ./ res_espet);
 
 % =========== THD =========== %
 
@@ -84,14 +101,18 @@ power_spect = 20 * log10(tf_uni);
 
 f = res_espet * (0:n_samples/2);
 
-figure(1);
+noise_rms = sqrt((fa / 2) * 10 .^ (mean(mean(power_spect_den)) ./ 10));
 
-subplot(2, 1, 1);
-plot(t(1:100), data(1:100));
+plot(f, mean(power_spect));
 
-subplot(2, 1, 2);
-plot(f, power_spect);
-title("Dados adquiridos", "frequência: " + f_fund + "valor médio: " + valor_medio + ...
-    " valor eficaz: " + valef,"número de amostras: " + n_samples, ...
-    "frequência de amostragem: " + fa,"alcance: " + range);
+%figure(1);
+
+%subplot(2, 1, 1);
+%plot(t(1:100), data(1, 1:100));
+%title("Dados adquiridos", "Frequência: " + f_fund + " | Valor eficaz do ruído: " + noise_ef +...
+%    " | Valor eficaz: " + valef + " | Número de amostras: " + n_samples +  ...
+%    " | Frequência de amostragem: " + fa + " | Alcance: " + range);
+
+%subplot(2, 1, 2);
+%plot(f, power_spect);
 
